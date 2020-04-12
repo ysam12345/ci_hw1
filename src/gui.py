@@ -12,6 +12,7 @@ from tkinter.filedialog import askopenfilename
 from data import Data
 from car import Car
 from road import Road
+from gui_utils import add_text, add_button, add_spinbox
 
 
 class GUI(tk.Frame):
@@ -23,7 +24,7 @@ class GUI(tk.Frame):
         self.car, self.road = self.init_components()
         self.create_widgets()
         self.clean_fig()
-        self.draw_road(self.data['finish_area'], self.data['road_edges'])
+        self.draw_road(self.road.finish_area, self.road.road_edges)
         self.draw_car(self.car.loc(), self.car.car_degree, self.car.radius)
 
     def load_data(self):
@@ -37,57 +38,30 @@ class GUI(tk.Frame):
         r = Road(self.data['finish_area'], self.data['road_edges'])
         return c, r
 
-    def add_text(self, row, label, text):
-        l = tk.Label(self)
-        l["text"] = label
-        l.grid(row=row, column=0, sticky=tk.N+tk.W)
-        t = tk.Label(self)
-        t["text"] = text
-        t.grid(row=row, column=1, sticky=tk.N+tk.W)
-        return l, t
-
-    def add_button(self, row, label, text, func):
-        l = tk.Label(self)
-        l["text"] = label
-        l.grid(row=row, column=0, sticky=tk.N+tk.W)
-        b = tk.Button(self)
-        b["text"] = text
-        b.grid(row=row, column=1, sticky=tk.N+tk.W)
-        b["command"] = func
-        return l, b
-
-    def add_spinbox(self, row, label, from_, to):
-        l = tk.Label(self)
-        l["text"] = label
-        l.grid(row=row, column=0, sticky=tk.N+tk.W)
-        sb = tk.Spinbox(self, from_=from_, to=to)
-        sb.grid(row=row, column=1, sticky=tk.N+tk.W)
-        return l, sb
-
     def create_widgets(self):
         # 標題
         self.winfo_toplevel().title("Yochien CI HW1")
 
         # 自走車位置、方向、感測器距離
-        _, self.loc = self.add_text(0, "Car Location", self.car.loc())
-        _, self.fl = self.add_text(
-            1, "Car Sensor Front Left", self.car.sensor_dist['fl'])
-        _, self.f = self.add_text(
-            2, "Car Sensor Front", self.car.sensor_dist['f'])
-        _, self.fr = self.add_text(
-            3, "Car Sensor Front Right", self.car.sensor_dist['fr'])
-        _, self.cd = self.add_text(
-            4, "Car Degree", self.car.car_degree)
-        _, self.swd = self.add_text(
-            5, "Car Steering Wheel Degree", self.car.steering_wheel_degree)
+        _, self.loc = add_text(self, 0, "Car Location", self.car.loc())
+        _, self.fl = add_text(self,
+                                   1, "Car Sensor Front Left", self.car.sensor_dist['fl'])
+        _, self.f = add_text(self,
+                                  2, "Car Sensor Front", self.car.sensor_dist['f'])
+        _, self.fr = add_text(self,
+                                   3, "Car Sensor Front Right", self.car.sensor_dist['fr'])
+        _, self.cd = add_text(self,
+                                   4, "Car Degree", self.car.car_degree)
+        _, self.swd = add_text(self,
+                                    5, "Car Steering Wheel Degree", self.car.steering_wheel_degree)
         # 更新車子
-        _, self.next = self.add_button(
-            6, "Move Car to Next Step", "Update", self.update_car)
+        _, self.next = add_button(self,
+                                       6, "Move Car to Next Step", "Update", self.update_car)
         # 轉方向盤
-        _, self.tswd = self.add_spinbox(7, "Turn Steering Wheel Degree", -40, 40)
-        _, self.tb = self.add_button(
-            8, "Turn Steering Wheel", "Apply", self.turn_steering_wheel)
-
+        _, self.tswd = add_spinbox(
+            self, 7, "Turn Steering Wheel Degree", -40, 40)
+        _, self.tb = add_button(self,
+                                     8, "Turn Steering Wheel", "Apply", self.turn_steering_wheel)
 
         # 地圖與道路
         self.road_fig = Figure(figsize=(5, 5), dpi=120)
@@ -105,7 +79,7 @@ class GUI(tk.Frame):
         self.cd["text"] = self.car.car_degree
         self.swd["text"] = self.car.steering_wheel_degree
         self.clean_fig()
-        self.draw_road(self.data['finish_area'], self.data['road_edges'])
+        self.draw_road(self.road.finish_area, self.road.road_edges)
         self.draw_car(self.car.loc(), self.car.car_degree, self.car.radius)
         self.road_canvas.draw()
 
@@ -116,7 +90,6 @@ class GUI(tk.Frame):
         self.road_fig.ax.set_aspect(1)
         self.road_fig.ax.set_xlim([-20, 60])
         self.road_fig.ax.set_ylim([-10, 60])
-        
 
     def draw_road(self, finish_area, road_edges):
         # 車道邊界
