@@ -42,10 +42,10 @@ class Fuzzifier():
         return Fuzzifier.to_level(s, m, l)
 
     def side_small(self, input_):
-        if input_ < 4:
+        if input_ < 5:
             return 1
-        elif input_ < 6:
-            return (6 - input_)/2
+        elif input_ < 7:
+            return (7 - input_)/2
         else:
             return 0
 
