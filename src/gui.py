@@ -16,6 +16,8 @@ from gui_utils import add_text, add_button, add_spinbox
 from fuzz import Fuzzifier, Rules
 from enum import Enum
 from time import sleep
+from recorder import Recorder
+
 
 class State(Enum):
     PLAYING = 0
@@ -31,11 +33,12 @@ class GUI(tk.Frame):
         self.data = self.load_data()
         self.car, self.road = self.init_components()
         self.state = State.PLAYING
+        self.recorder = Recorder()
+        self.recorder.add(self.car)
         self.create_widgets()
         self.clean_fig()
         self.draw_road(self.road.finish_area, self.road.road_edges)
         self.draw_car(self.car.loc(), self.car.car_degree, self.car.radius)
-        
 
     def load_data(self):
         case_file_path = '../cases/case01.txt'
@@ -69,7 +72,7 @@ class GUI(tk.Frame):
                                   6, "Start Playing", "Run", self.run)
         # 目前狀態
         _, self.st = add_text(self,
-                               7, "Status", self.state)
+                              7, "Status", self.state)
 
         # 地圖與道路
         self.road_fig = Figure(figsize=(5, 5), dpi=120)
@@ -86,21 +89,22 @@ class GUI(tk.Frame):
             self.update()
             sleep(0.1)
 
-
     def update(self):
         self.update_state()
         self.update_car()
+        self.recorder.add(self.car)
 
     def update_state(self):
         if self.road.is_crash(self.car):
             self.state = State.CRASH
         elif self.road.is_finish(self.car):
             self.state = State.FINISH
+            self.recorder.to_file()
         self.st["text"] = self.state
+
     def update_car(self):
         fl, f, fr = self.car.update_sensor(
             self.data['road_edges'])
-        print(fl, f, fr)
         fl = Fuzzifier.fl(fl)
         f = Fuzzifier.f(f)
         fr = Fuzzifier.fr(fr)
