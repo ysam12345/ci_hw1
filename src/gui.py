@@ -87,7 +87,7 @@ class GUI(tk.Frame):
     def run(self):
         while self.state == State.PLAYING:
             self.update()
-            sleep(0.1)
+            sleep(0.025)
 
     def update(self):
         self.update_state()
@@ -100,6 +100,7 @@ class GUI(tk.Frame):
         elif self.road.is_finish(self.car):
             self.state = State.FINISH
             self.recorder.to_file()
+            
         self.st["text"] = self.state
 
     def update_car(self):
@@ -117,6 +118,7 @@ class GUI(tk.Frame):
         self.clean_fig()
         self.draw_road(self.road.finish_area, self.road.road_edges)
         self.draw_car(self.car.loc(), self.car.car_degree, self.car.radius)
+        self.draw_route()
         self.road_canvas.draw()
 
     def clean_fig(self):
@@ -156,6 +158,11 @@ class GUI(tk.Frame):
                 [loc[1], self.car.sensor_point[s][1]], 'r')
             self.road_fig.ax.plot(
                 self.car.sensor_point[s][0], self.car.sensor_point[s][1], '.b')
+
+    def draw_route(self):
+        records = self.recorder.get()
+        for r in records:
+            self.road_fig.ax.plot(int(float(r[0])+0.0001), int(float(r[1])+0.0001), '.y')
 
 
 if __name__ == "__main__":
