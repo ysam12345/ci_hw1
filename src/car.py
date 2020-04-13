@@ -27,12 +27,12 @@ class Car():
         front_right_degree = self.car_degree - 45
         detect_range = 100
         # sensor detect point
-        fl_x = self.x + cos(pi * front_left_degree / 180) * detect_range
-        fl_y = self.y + sin(pi * front_left_degree / 180) * detect_range
-        f_x = self.x + cos(pi * self.car_degree / 180) * detect_range
-        f_y = self.y + sin(pi * self.car_degree / 180) * detect_range
-        fr_x = self.x + cos(pi * front_right_degree / 180) * detect_range
-        fr_y = self.y + sin(pi * front_right_degree / 180) * detect_range
+        fl_x = int(self.x + cos(pi * front_left_degree / 180) * detect_range)
+        fl_y = int(self.y + sin(pi * front_left_degree / 180) * detect_range)
+        f_x = int(self.x + cos(pi * self.car_degree / 180) * detect_range)
+        f_y = int(self.y + sin(pi * self.car_degree / 180) * detect_range)
+        fr_x = int(self.x + cos(pi * front_right_degree / 180) * detect_range)
+        fr_y = int(self.y + sin(pi * front_right_degree / 180) * detect_range)
         return [fl_x, fl_y], [f_x, f_y], [fr_x, fr_y]
 
     def update_sensor(self, road_edges):
@@ -46,6 +46,8 @@ class Car():
         }
         s_p = {"fl": [], "f": [], "fr": []}
         for sensor in s_lines:
+            self.sensor_dist[sensor] = 0
+            self.sensor_point[sensor] = [0, 0]
             self.sensor_dist[sensor] = 100000
             for l in road_lines:
                 p = line_intersec(l, s_lines[sensor])

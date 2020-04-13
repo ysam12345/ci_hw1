@@ -13,6 +13,14 @@ from data import Data
 from car import Car
 from road import Road
 from gui_utils import add_text, add_button, add_spinbox
+from fuzz import Fuzzifier, Rules
+from enum import Enum
+from time import sleep
+
+class State(Enum):
+    PLAYING = 0
+    CRASH = 1
+    FINISH = 2
 
 
 class GUI(tk.Frame):
@@ -22,10 +30,12 @@ class GUI(tk.Frame):
         self.grid()
         self.data = self.load_data()
         self.car, self.road = self.init_components()
+        self.state = State.PLAYING
         self.create_widgets()
         self.clean_fig()
         self.draw_road(self.road.finish_area, self.road.road_edges)
         self.draw_car(self.car.loc(), self.car.car_degree, self.car.radius)
+        
 
     def load_data(self):
         case_file_path = '../cases/case01.txt'
@@ -45,35 +55,57 @@ class GUI(tk.Frame):
         # 自走車位置、方向、感測器距離
         _, self.loc = add_text(self, 0, "Car Location", self.car.loc())
         _, self.fl = add_text(self,
-                                   1, "Car Sensor Front Left", self.car.sensor_dist['fl'])
+                              1, "Car Sensor Front Left", self.car.sensor_dist['fl'])
         _, self.f = add_text(self,
-                                  2, "Car Sensor Front", self.car.sensor_dist['f'])
+                             2, "Car Sensor Front", self.car.sensor_dist['f'])
         _, self.fr = add_text(self,
-                                   3, "Car Sensor Front Right", self.car.sensor_dist['fr'])
+                              3, "Car Sensor Front Right", self.car.sensor_dist['fr'])
         _, self.cd = add_text(self,
-                                   4, "Car Degree", self.car.car_degree)
+                              4, "Car Degree", self.car.car_degree)
         _, self.swd = add_text(self,
-                                    5, "Car Steering Wheel Degree", self.car.steering_wheel_degree)
+                               5, "Car Steering Wheel Degree", self.car.steering_wheel_degree)
         # 更新車子
         _, self.next = add_button(self,
-                                       6, "Move Car to Next Step", "Update", self.update_car)
-        # 轉方向盤
-        _, self.tswd = add_spinbox(
-            self, 7, "Turn Steering Wheel Degree", -40, 40)
-        _, self.tb = add_button(self,
-                                     8, "Turn Steering Wheel", "Apply", self.turn_steering_wheel)
+                                  6, "Start Playing", "Run", self.run)
+        # 目前狀態
+        _, self.st = add_text(self,
+                               7, "Status", self.state)
 
         # 地圖與道路
         self.road_fig = Figure(figsize=(5, 5), dpi=120)
         self.road_canvas = FigureCanvasTkAgg(
             self.road_fig, self)
         self.road_canvas.draw()
-        self.road_canvas.get_tk_widget().grid(row=9, column=0, columnspan=3)
+        self.road_canvas.get_tk_widget().grid(row=8, column=0, columnspan=3)
 
-    def turn_steering_wheel(self):
-        self.car.turn_steering_wheel(int(self.tswd.get()))
+    def turn_steering_wheel(self, degree):
+        self.car.turn_steering_wheel(degree)
 
+    def run(self):
+        while self.state == State.PLAYING:
+            self.update()
+            sleep(0.1)
+
+
+    def update(self):
+        self.update_state()
+        self.update_car()
+
+    def update_state(self):
+        if self.road.is_crash(self.car):
+            self.state = State.CRASH
+        elif self.road.is_finish(self.car):
+            self.state = State.FINISH
+        self.st["text"] = self.state
     def update_car(self):
+        fl, f, fr = self.car.update_sensor(
+            self.data['road_edges'])
+        print(fl, f, fr)
+        fl = Fuzzifier.fl(fl)
+        f = Fuzzifier.f(f)
+        fr = Fuzzifier.fr(fr)
+        self.turn_steering_wheel(Rules.apply(fl, f, fr))
+
         self.car.next()
         self.loc["text"] = self.car.loc()
         self.cd["text"] = self.car.car_degree
@@ -98,7 +130,6 @@ class GUI(tk.Frame):
                 road_edges[i][0], road_edges[i][1]))
             self.road_fig.ax.plot([road_edges[i][0], road_edges[i+1][0]], [
                                   road_edges[i][1], road_edges[i+1][1]], 'k')
-
         # 終點區域
         a, b = finish_area[0]
         c, d = finish_area[1]

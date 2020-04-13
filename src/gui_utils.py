@@ -1,5 +1,6 @@
 import tkinter as tk
 
+
 def add_text(frame, row, label, text):
     l = tk.Label(frame)
     l["text"] = label
@@ -8,6 +9,7 @@ def add_text(frame, row, label, text):
     t["text"] = text
     t.grid(row=row, column=1, sticky=tk.N+tk.W)
     return l, t
+
 
 def add_button(frame, row, label, text, func):
     l = tk.Label(frame)
@@ -18,6 +20,7 @@ def add_button(frame, row, label, text, func):
     b.grid(row=row, column=1, sticky=tk.N+tk.W)
     b["command"] = func
     return l, b
+
 
 def add_spinbox(frame, row, label, from_, to):
     l = tk.Label(frame)
