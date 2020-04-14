@@ -87,7 +87,7 @@ class GUI(tk.Frame):
     def run(self):
         while self.state == State.PLAYING:
             self.update()
-            sleep(0.025)
+            sleep(0.02)
 
     def update(self):
         self.update_state()
