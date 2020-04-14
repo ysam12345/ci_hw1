@@ -4,8 +4,7 @@
 ## Getting Started
 
 ### Demo
-![](https://i.imgur.com/yoetTME.gif =40%x)
-
+<img src="https://i.imgur.com/yoetTME.gif" width="400">
 
 ### Prerequisites
 
