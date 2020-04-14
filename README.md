@@ -4,7 +4,7 @@
 ## Getting Started
 
 ### Demo
-[Youtube demo video](https://youtu.be/sNgAKdOSO7Y)
+![](https://i.imgur.com/yoetTME.gif =40%x)
 
 
 ### Prerequisites
