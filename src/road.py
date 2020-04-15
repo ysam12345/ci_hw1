@@ -1,25 +1,14 @@
 from numpy import sin, arcsin, cos, pi
 from utils import line_intersec, dist
-from shapely.geometry import Point, Polygon
 
 
 class Road():
     def __init__(self, finish_area, road_edges):
         self.finish_area = finish_area
         self.road_edges = road_edges
-        self.finish_poly = self.get_finish_polygon()
-
-    def get_finish_polygon(self):
-        a, b = self.finish_area[0]
-        c, d = self.finish_area[1]
-        coords = [(a, b), (c, b), (
-            c, d), (c, b), (a, b)]
-        return Polygon(coords)
 
     def is_finish(self, car):
-        loc = car.loc()
-        p = Point(loc[0], loc[1])
-        return self.is_in(p, self.finish_poly)
+        return self.is_in_rect(car.loc(), self.finish_area)
 
     def is_crash(self, car):
         for i in self.dist(car, self.road_edges):
@@ -27,8 +16,17 @@ class Road():
                 return True
         return False
 
-    def is_in(self, point, polygon):
-        return point.within(polygon)
+    def is_in_rect(self, point, rect):
+        '''
+        rect[0] = upper left
+        rect[1] = button right
+        '''
+        if point[0] < rect[1][0] \
+                and point[0] > rect[0][0] \
+                and point[1] < rect[0][1] \
+                and point[1] > rect[1][1]:
+            return True
+        return False
 
     def edge(self, car):
         detect_range = 100
